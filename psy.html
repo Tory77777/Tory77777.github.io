@@ -4,123 +4,157 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Топ 10 лучших фильмов</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-        }
-        
-        .movie {
-            margin-bottom: 20px;
-            padding: 15px;
-            border-left: 4px solid #007bff;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-        }
-        
-        .movie h2 {
-            margin: 0;
-            color: #007bff;
-        }
-        
-        .movie p {
-            margin: 5px 0;
-            color: #666;
-        }
-        
-        .rating {
-            font-weight: bold;
-            color: #ff6b35;
-        }
-        
-        .number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #007bff;
-            margin-right: 10px;
-        }
-    </style>
+    <!-- Подключение внешних CSS стилей -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="psy.css">
 </head>
 <body>
     <div class="container">
-        <h1>🎬 Топ 10 лучших фильмов всех времен</h1>
+        <header>
+            <h1><i class="fas fa-film"></i> Топ 10 лучших фильмов</h1>
+            <p class="description">Подборка самых выдающихся кинокартин по версии кинокритиков и зрителей со всего мира</p>
+        </header>
         
-        <div class="movie">
-            <h2><span class="number">1</span>Крестный отец (1972)</h2>
-            <p><strong>Режиссер:</strong> Фрэнсис Форд Коппола</p>
-            <p><strong>Рейтинг:</strong> <span class="rating">9.2/10</span></p>
+        <!-- Контейнер для списка фильмов -->
+        <div class="movies-container">
+            <!-- Контейнер для каждого фильма -->
+            <div class="movie-card">
+                <div class="movie-poster" style="background-color: #1a2a6c;">
+                    <span>1</span>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">Крестный отец</h3>
+                    <p class="movie-details">1972 • Фрэнсис Форд Коппола</p>
+                    <p class="rating">Рейтинг: 9.2/10</p>
+                </div>
+            </div>
+            
+            <div class="movie-card">
+                <div class="movie-poster" style="background-color: #b21f1f;">
+                    <span>2</span>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">Побег из Шоушенка</h3>
+                    <p class="movie-details">1994 • Фрэнк Дарабонт</p>
+                    <p class="rating">Рейтинг: 9.3/10</p>
+                </div>
+            </div>
+            
+            <div class="movie-card">
+                <div class="movie-poster" style="background-color: #fdbb2d;">
+                    <span>3</span>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">Темный рыцарь</h3>
+                    <p class="movie-details">2008 • Кристофер Нолан</p>
+                    <p class="rating">Рейтинг: 9.0/10</p>
+                </div>
+            </div>
+            
+            <div class="movie-card">
+                <div class="movie-poster" style="background-color: #1a2a6c;">
+                    <span>4</span>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">Крестный отец 2</h3>
+                    <p class="movie-details">1974 • Фрэнсис Форд Коппола</p>
+                    <p class="rating">Рейтинг: 9.0/10</p>
+                </div>
+            </div>
+            
+            <div class="movie-card">
+                <div class="movie-poster" style="background-color: #b21f1f;">
+                    <span>5</span>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">12 разгневанных мужчин</h3>
+                    <p class="movie-details">1957 • Сидни Люмет</p>
+                    <p class="rating">Рейтинг: 9.0/10</p>
+                </div>
+            </div>
+            
+            <div class="movie-card">
+                <div class="movie-poster" style="background-color: #fdbb2d;">
+                    <span>6</span>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">Список Шиндлера</h3>
+                    <p class="movie-details">1993 • Стивен Спилберг</p>
+                    <p class="rating">Рейтинг: 8.9/10</p>
+                </div>
+            </div>
+            
+            <div class="movie-card">
+                <div class="movie-poster" style="background-color: #1a2a6c;">
+                    <span>7</span>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">Властелин колец: Возвращение короля</h3>
+                    <p class="movie-details">2003 • Питер Джексон</p>
+                    <p class="rating">Рейтинг: 8.9/10</p>
+                </div>
+            </div>
+            
+            <div class="movie-card">
+                <div class="movie-poster" style="background-color: #b21f1f;">
+                    <span>8</span>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">Криминальное чтиво</h3>
+                    <p class="movie-details">1994 • Квентин Тарантино</p>
+                    <p class="rating">Рейтинг: 8.9/10</p>
+                </div>
+            </div>
+            
+            <div class="movie-card">
+                <div class="movie-poster" style="background-color: #fdbb2d;">
+                    <span>9</span>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">Хороший, плохой, злой</h3>
+                    <p class="movie-details">1966 • Серджио Леоне</p>
+                    <p class="rating">Рейтинг: 8.8/10</p>
+                </div>
+            </div>
+            
+            <div class="movie-card">
+                <div class="movie-poster" style="background-color: #1a2a6c;">
+                    <span>10</span>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">Форрест Гамп</h3>
+                    <p class="movie-details">1994 • Роберт Земекис</p>
+                    <p class="rating">Рейтинг: 8.8/10</p>
+                </div>
+            </div>
         </div>
         
-        <div class="movie">
-            <h2><span class="number">2</span>Побег из Шоушенка (1994)</h2>
-            <p><strong>Режиссер:</strong> Фрэнк Дарабонт</p>
-            <p><strong>Рейтинг:</strong> <span class="rating">9.3/10</span></p>
+        <!-- Контейнер для кнопки -->
+        <div class="button-container">
+            <button class="action-button" onclick="console.log(123)">
+                <i class="fas fa-play-circle"></i> Проверить консоль
+            </button>
+            
+            <button class="action-button secondary" onclick="showMovieCount()">
+                <i class="fas fa-info-circle"></i> Показать количество фильмов
+            </button>
         </div>
         
-        <div class="movie">
-            <h2><span class="number">3</span>Темный рыцарь (2008)</h2>
-            <p><strong>Режиссер:</strong> Кристофер Нолан</p>
-            <p><strong>Рейтинг:</strong> <span class="rating">9.0/10</span></p>
-        </div>
-        
-        <div class="movie">
-            <h2><span class="number">4</span>Крестный отец 2 (1974)</h2>
-            <p><strong>Режиссер:</strong> Фрэнсис Форд Коппола</p>
-            <p><strong>Рейтинг:</strong> <span class="rating">9.0/10</span></p>
-        </div>
-        
-        <div class="movie">
-            <h2><span class="number">5</span>12 разгневанных мужчин (1957)</h2>
-            <p><strong>Режиссер:</strong> Сидни Люмет</p>
-            <p><strong>Рейтинг:</strong> <span class="rating">9.0/10</span></p>
-        </div>
-        
-        <div class="movie">
-            <h2><span class="number">6</span>Список Шиндлера (1993)</h2>
-            <p><strong>Режиссер:</strong> Стивен Спилберг</p>
-            <p><strong>Рейтинг:</strong> <span class="rating">8.9/10</span></p>
-        </div>
-        
-        <div class="movie">
-            <h2><span class="number">7</span>Властелин колец: Возвращение короля (2003)</h2>
-            <p><strong>Режиссер:</strong> Питер Джексон</p>
-            <p><strong>Рейтинг:</strong> <span class="rating">8.9/10</span></p>
-        </div>
-        
-        <div class="movie">
-            <h2><span class="number">8</span>Криминальное чтиво (1994)</h2>
-            <p><strong>Режиссер:</strong> Квентин Тарантино</p>
-            <p><strong>Рейтинг:</strong> <span class="rating">8.9/10</span></p>
-        </div>
-        
-        <div class="movie">
-            <h2><span class="number">9</span>Хороший, плохой, злой (1966)</h2>
-            <p><strong>Режиссер:</strong> Серджио Леоне</p>
-            <p><strong>Рейтинг:</strong> <span class="rating">8.8/10</span></p>
-        </div>
-        
-        <div class="movie">
-            <h2><span class="number">10</span>Форрест Гамп (1994)</h2>
-            <p><strong>Режиссер:</strong> Роберт Земекис</p>
-            <p><strong>Рейтинг:</strong> <span class="rating">8.8/10</span></p>
-        </div>
+        <footer>
+            <p>© 2023 Подборка лучших фильмов. Все права защищены.</p>
+        </footer>
     </div>
+    
+    <!-- Подключение внешнего JavaScript -->
+    <script>
+        // Скрипт, который выполнится при загрузке страницы
+        console.log("Страница загружена!");
+        console.log("Нажмите на кнопку 'Проверить консоль', чтобы увидеть 123 в консоли");
+        
+        // Функция для показа количества фильмов
+        function showMovieCount() {
+            alert("В подборке представлено 10 лучших фильмов!");
+        }
+    </script>
 </body>
 </html>
