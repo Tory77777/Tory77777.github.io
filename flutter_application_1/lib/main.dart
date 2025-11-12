@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const HoroscopeApp());
@@ -15,13 +18,284 @@ class HoroscopeApp extends StatelessWidget {
         primarySwatch: Colors.purple,
         fontFamily: 'Roboto',
       ),
-      home: const HoroscopeScreen(),
+      home: const AuthScreen(),
+    );
+  }
+}
+
+class AuthScreen extends StatefulWidget {
+  const AuthScreen({super.key});
+
+  @override
+  State<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends State<AuthScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _birthDateController = TextEditingController();
+  
+  bool _isLogin = true;
+  DateTime? _selectedBirthDate;
+  
+  final UserRepository _userRepository = UserRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfUserLoggedIn();
+  }
+
+  void _checkIfUserLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userEmail = prefs.getString('currentUser');
+    if (userEmail != null && mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HoroscopeScreen(userEmail: userEmail),
+        ),
+      );
+    }
+  }
+
+  Future<void> _selectBirthDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    
+    if (picked != null) {
+      setState(() {
+        _selectedBirthDate = picked;
+        _birthDateController.text = '${picked.day}.${picked.month}.${picked.year}';
+      });
+    }
+  }
+
+  void _submitForm() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final name = _nameController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      _showError('Пожалуйста, заполните все обязательные поля');
+      return;
+    }
+
+    if (!_isLogin && (name.isEmpty || _selectedBirthDate == null)) {
+      _showError('Пожалуйста, заполните все поля для регистрации');
+      return;
+    }
+
+    try {
+      if (_isLogin) {
+        final user = await _userRepository.loginUser(email, password);
+        if (user != null) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('currentUser', email);
+          
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HoroscopeScreen(userEmail: email),
+              ),
+            );
+          }
+        } else {
+          _showError('Неверный email или пароль');
+        }
+      } else {
+        final newUser = User(
+          email: email,
+          password: password,
+          name: name,
+          birthDate: _selectedBirthDate!,
+          registrationDate: DateTime.now(),
+        );
+        
+        final success = await _userRepository.registerUser(newUser);
+        if (success) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('currentUser', email);
+          
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HoroscopeScreen(userEmail: email),
+              ),
+            );
+          }
+        } else {
+          _showError('Пользователь с таким email уже существует');
+        }
+      }
+    } catch (e) {
+      _showError('Произошла ошибка: $e');
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.purple, Colors.deepPurple],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Card(
+              elevation: 8,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.star,
+                      size: 60,
+                      color: Colors.purple,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      _isLogin ? 'Вход в Гороскоп' : 'Регистрация',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Поле имени (только для регистрации)
+                    if (!_isLogin) ...[
+                      TextField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Имя',
+                          prefixIcon: Icon(Icons.person),
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Поле даты рождения (только для регистрации)
+                      TextField(
+                        controller: _birthDateController,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Дата рождения',
+                          prefixIcon: const Icon(Icons.calendar_today),
+                          border: const OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.calendar_month),
+                            onPressed: () => _selectBirthDate(context),
+                          ),
+                        ),
+                        onTap: () => _selectBirthDate(context),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    
+                    // Поле email
+                    TextField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        prefixIcon: Icon(Icons.email),
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Поле пароля
+                    TextField(
+                      controller: _passwordController,
+                      decoration: const InputDecoration(
+                        labelText: 'Пароль',
+                        prefixIcon: Icon(Icons.lock),
+                        border: OutlineInputBorder(),
+                      ),
+                      obscureText: true,
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Кнопка отправки
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _submitForm,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
+                        child: Text(
+                          _isLogin ? 'Войти' : 'Зарегистрироваться',
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Переключение между входом и регистрацией
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _isLogin = !_isLogin;
+                          _nameController.clear();
+                          _birthDateController.clear();
+                          _selectedBirthDate = null;
+                        });
+                      },
+                      child: Text(
+                        _isLogin 
+                            ? 'Нет аккаунта? Зарегистрируйтесь'
+                            : 'Уже есть аккаунт? Войдите',
+                        style: const TextStyle(color: Colors.purple),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
 
 class HoroscopeScreen extends StatefulWidget {
-  const HoroscopeScreen({super.key});
+  final String userEmail;
+
+  const HoroscopeScreen({super.key, required this.userEmail});
 
   @override
   State<HoroscopeScreen> createState() => _HoroscopeScreenState();
@@ -30,7 +304,9 @@ class HoroscopeScreen extends StatefulWidget {
 class _HoroscopeScreenState extends State<HoroscopeScreen> {
   DateTime? _selectedDate;
   ZodiacSign? _zodiacSign;
+  User? _currentUser;
 
+  final UserRepository _userRepository = UserRepository();
   final Map<ZodiacSign, String> _zodiacDescriptions = {
     ZodiacSign.aries: '''
 Овен - первый знак зодиака, символизирующий начало и энергию.
@@ -93,10 +369,27 @@ class _HoroscopeScreenState extends State<HoroscopeScreen> {
 Слабые стороны: боязливый, слишком доверчивый, грустный, желание убежать от реальности''',
   };
 
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  void _loadUserData() async {
+    final user = await _userRepository.getUser(widget.userEmail);
+    if (user != null && mounted) {
+      setState(() {
+        _currentUser = user;
+        _selectedDate = user.birthDate;
+        _zodiacSign = _calculateZodiacSign(user.birthDate);
+      });
+    }
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) {
@@ -116,6 +409,27 @@ class _HoroscopeScreenState extends State<HoroscopeScreen> {
         _selectedDate = picked;
         _zodiacSign = _calculateZodiacSign(picked);
       });
+      
+      // Обновляем дату рождения пользователя
+      if (_currentUser != null) {
+        final updatedUser = _currentUser!.copyWith(birthDate: picked);
+        await _userRepository.updateUser(updatedUser);
+        setState(() {
+          _currentUser = updatedUser;
+        });
+      }
+    }
+  }
+
+  void _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('currentUser');
+    
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const AuthScreen()),
+      );
     }
   }
 
@@ -208,6 +522,23 @@ class _HoroscopeScreenState extends State<HoroscopeScreen> {
         title: const Text('Гороскоп'),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
+        actions: [
+          if (_currentUser != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Center(
+                child: Text(
+                  'Привет, ${_currentUser!.name}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
+            tooltip: 'Выйти',
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -233,15 +564,15 @@ class _HoroscopeScreenState extends State<HoroscopeScreen> {
                   ),
                 ],
               ),
-              child: const Column(
+              child: Column(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.star,
                     size: 50,
                     color: Colors.white,
                   ),
-                  SizedBox(height: 10),
-                  Text(
+                  const SizedBox(height: 10),
+                  const Text(
                     'Узнай свой знак зодиака',
                     style: TextStyle(
                       fontSize: 24,
@@ -250,8 +581,8 @@ class _HoroscopeScreenState extends State<HoroscopeScreen> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 5),
-                  Text(
+                  const SizedBox(height: 5),
+                  const Text(
                     'Введите дату рождения и узнайте свою судьбу',
                     style: TextStyle(
                       fontSize: 16,
@@ -278,7 +609,7 @@ class _HoroscopeScreenState extends State<HoroscopeScreen> {
               ),
               icon: const Icon(Icons.calendar_today),
               label: const Text(
-                'Выбрать дату рождения',
+                'Изменить дату рождения',
                 style: TextStyle(fontSize: 18),
               ),
             ),
@@ -288,7 +619,7 @@ class _HoroscopeScreenState extends State<HoroscopeScreen> {
             // Отображение выбранной даты
             if (_selectedDate != null)
               Text(
-                'Выбранная дата: ${_selectedDate!.day}.${_selectedDate!.month}.${_selectedDate!.year}',
+                'Дата рождения: ${_selectedDate!.day}.${_selectedDate!.month}.${_selectedDate!.year}',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
@@ -401,6 +732,119 @@ class _HoroscopeScreenState extends State<HoroscopeScreen> {
       facts[sign]!,
       style: const TextStyle(fontSize: 16),
     );
+  }
+}
+
+// Модель пользователя
+class User {
+  final String email;
+  final String password;
+  final String name;
+  final DateTime birthDate;
+  final DateTime registrationDate;
+
+  User({
+    required this.email,
+    required this.password,
+    required this.name,
+    required this.birthDate,
+    required this.registrationDate,
+  });
+
+  User copyWith({
+    String? email,
+    String? password,
+    String? name,
+    DateTime? birthDate,
+    DateTime? registrationDate,
+  }) {
+    return User(
+      email: email ?? this.email,
+      password: password ?? this.password,
+      name: name ?? this.name,
+      birthDate: birthDate ?? this.birthDate,
+      registrationDate: registrationDate ?? this.registrationDate,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'email': email,
+      'password': password,
+      'name': name,
+      'birthDate': birthDate.toIso8601String(),
+      'registrationDate': registrationDate.toIso8601String(),
+    };
+  }
+
+  static User fromMap(Map<String, dynamic> map) {
+    return User(
+      email: map['email'],
+      password: map['password'],
+      name: map['name'],
+      birthDate: DateTime.parse(map['birthDate']),
+      registrationDate: DateTime.parse(map['registrationDate']),
+    );
+  }
+}
+
+// Репозиторий для работы с пользователями
+class UserRepository {
+  final List<User> _users = [];
+
+  Future<bool> registerUser(User newUser) async {
+    // Проверяем, существует ли пользователь с таким email
+    if (_users.any((user) => user.email == newUser.email)) {
+      return false;
+    }
+    
+    _users.add(newUser);
+    await _saveUsersToStorage();
+    return true;
+  }
+
+  Future<User?> loginUser(String email, String password) async {
+    await _loadUsersFromStorage();
+    try {
+      return _users.firstWhere(
+        (user) => user.email == email && user.password == password,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<User?> getUser(String email) async {
+    await _loadUsersFromStorage();
+    try {
+      return _users.firstWhere((user) => user.email == email);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> updateUser(User updatedUser) async {
+    final index = _users.indexWhere((user) => user.email == updatedUser.email);
+    if (index != -1) {
+      _users[index] = updatedUser;
+      await _saveUsersToStorage();
+    }
+  }
+
+  Future<void> _saveUsersToStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final usersJson = _users.map((user) => user.toMap()).toList();
+    await prefs.setString('users', jsonEncode(usersJson));
+  }
+
+  Future<void> _loadUsersFromStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final usersJson = prefs.getString('users');
+    if (usersJson != null) {
+      final List<dynamic> usersList = jsonDecode(usersJson);
+      _users.clear();
+      _users.addAll(usersList.map((userMap) => User.fromMap(userMap)));
+    }
   }
 }
 
